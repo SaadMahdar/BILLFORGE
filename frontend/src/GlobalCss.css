@@ -1,0 +1,256 @@
+/* ==========================================================================
+   1. VARIABLES GLOBALES (Design System Billforce)
+   ========================================================================== */
+:root {
+  /* Couleurs principales (Palette "Slick" et contrastée) */
+  --primary: #111827;       /* Noir très profond pour un look ultra-moderne */
+  --primary-hover: #374151; /* Gris anthracite au survol */
+  --accent: #4F46E5;        /* Indigo vif pour les liens ou petites touches */
+  
+  /* Fonds et Textes */
+  --bg-app: #F4F4F5;        /* Gris de fond (Zinc 100) */
+  --bg-surface: #FFFFFF;    /* Blanc pur pour les cartes */
+  --text-main: #09090B;     /* Texte principal (presque noir) */
+  --text-muted: #71717A;    /* Texte secondaire (Zinc 500) */
+  
+  /* Bordures (Cruciales puisqu'il n'y a pas d'ombres) */
+  --border-light: #E4E4E7;  /* Bordure standard */
+  --border-dark: #A1A1AA;   /* Bordure au survol/focus */
+  
+  /* Statuts */
+  --success-bg: #ECFDF5;
+  --success-text: #059669;
+  --warning-bg: #FFFBEB;
+  --warning-text: #D97706;
+  --danger-bg: #FEF2F2;
+  --danger-text: #DC2626;
+
+  /* Rayons (Border-radius modérés pour un look "sharp/slick") */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}
+
+/* ==========================================================================
+   2. RESET ET BASES
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary);
+}
+
+/* ==========================================================================
+   3. TYPOGRAPHIE
+   ========================================================================== */
+h1, h2, h3, h4 {
+  color: var(--text-main);
+  font-weight: 600;
+  letter-spacing: -0.02em; /* Rend les titres plus modernes */
+}
+
+.page-title {
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* ==========================================================================
+   4. LAYOUTS ET CARTES (Remplacent les ombres)
+   ========================================================================== */
+.page-layout {
+  padding: 32px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+/* LA CARTE UNIVERSELLE : Utilisée pour les formulaires, stats, tableaux... */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  /* AUCUNE OMBRE - Le contraste fond gris/carte blanche suffit */
+}
+
+/* ==========================================================================
+   5. FORMULAIRES ET INPUTS (Style "Flat")
+   ========================================================================== */
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+/* Pas de box-shadow au focus, on utilise une bordure plus foncée */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+input:hover:not(:focus) {
+  border-color: var(--border-dark);
+}
+
+/* ==========================================================================
+   6. BOUTONS
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+/* Bouton principal (Noir chic) */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98); /* Petit effet de clic au lieu d'une ombre */
+}
+
+/* Bouton secondaire / fantôme */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-app);
+  border-color: var(--border-dark);
+}
+
+/* Petit bouton (pour le tableau) */
+.btn-xs {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   7. BADGES (Statuts)
+   ========================================================================== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px; /* Forme de pilule complète */
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  /* Une petite bordure de la même couleur pour renforcer le flat design */
+}
+
+.badge-paid {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid #A7F3D0;
+}
+
+.badge-unpaid {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid #FDE68A;
+}
+
+/* ==========================================================================
+   8. TABLEAUX
+   ========================================================================== */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.invoice-table td {
+  padding: 16px;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+/* Ligne au survol pour la lisibilité */
+.invoice-table tbody tr:hover {
+  background-color: #FAFAFA;
+}
+
+.invoice-table tr:last-child td {
+  border-bottom: none;
+}
