@@ -10,7 +10,7 @@ const api = axios.create({
 
 // Attach token from localStorage on every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("billforce_token");
+  const token = localStorage.getItem("BILLFORGE_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("billforce_token");
+      localStorage.removeItem("BILLFORGE_token");
       window.location.href = "/login";
     }
     return Promise.reject(error);

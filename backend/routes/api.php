@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/invoices', [ApiInvoiceController::class, 'store']); // Create
     Route::patch('/invoices/{invoice}/status', [ApiInvoiceController::class, 'updateStatus']); // Patch Status
     Route::delete('/invoices/{invoice}', [ApiInvoiceController::class, 'destroy']); // Delete
-    Route::get('/invoices/{id}/pdf', [InvoiceController::class, 'downloadPdf']);
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
 });
 
 

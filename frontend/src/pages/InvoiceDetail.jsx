@@ -18,9 +18,9 @@ export default function InvoiceDetail() {
 
   // 4. Changer le statut (très basique)
   const handleToggleStatus = () => {
-    let newStatus = "payee";
-    if (invoice.status === "payee") {
-      newStatus = "non_payee";
+    let newStatus = "Paid";
+    if (invoice.status === "Paid") {
+      newStatus = "Unpaid";
     }
 
     // On met à jour sur le serveur, puis on modifie l'état local
@@ -49,7 +49,7 @@ export default function InvoiceDetail() {
   let statusLabel = "Non payée";
   let statusClass = "badge badge-unpaid";
   
-  if (invoice.status === "payee") {
+  if (invoice.status === "Paid") {
     statusLabel = "Payée";
     statusClass = "badge badge-paid";
   }
@@ -85,8 +85,8 @@ export default function InvoiceDetail() {
           </div>
           <div>
             <h4>Détails</h4>
-            <p>N° : {invoice.invoice_number}</p>
-            <p>Date : {invoice.invoice_date}</p>
+            <p>N° : {invoice.id}</p>
+            <p>Date : {invoice.issue_date}</p>
           </div>
         </div>
 
@@ -119,11 +119,7 @@ export default function InvoiceDetail() {
         {/* Totaux */}
         <div className="detail-card">
           <h4>Récapitulatif</h4>
-          <p>Sous-total HT : {Number(invoice.subtotal).toFixed(2)} MAD</p>
-          <p>Remise : - {Number(invoice.discount_amount).toFixed(2)} MAD</p>
-          <p>TVA : + {Number(invoice.vat_amount).toFixed(2)} MAD</p>
-          <hr />
-          <h2>Total TTC : {Number(invoice.total_ttc).toFixed(2)} MAD</h2>
+          <p>Total : {Number(invoice.total_amount).toFixed(2)} MAD</p>
         </div>
 
       </div>

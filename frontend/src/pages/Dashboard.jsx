@@ -1,174 +1,148 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-import { STATUS_LABELS, STATUS_CLASS, formatCurrency } from "../utilities";
-import "../GlobalCss.css";
 
 export default function Dashboard() {
-  // 1. États basiques
   const [invoices, setInvoices] = useState([]);
-  const [stats, setStats] = useState({ 
-    total_revenue: 0, 
-    paid_count: 0, 
-    unpaid_count: 0, 
-    total_count: 0 
-  });
+  const [loading, setLoading] = useState(true);
 
-  // 2. Fonction très simple pour récupérer les données
-  const getData = () => {
-    // Appel 1 : Les factures
+  // Load invoices
+  useEffect(() => {
     api.get("/invoices").then((res) => {
       setInvoices(res.data);
+      setLoading(false);
     });
-
-    // Appel 2 : Les statistiques
-    api.get("/invoices/stats").then((res) => {
-      setStats(res.data);
-    });
-  };
-
-  // 3. Charger les données au démarrage
-  useEffect(() => {
-    getData();
   }, []);
 
-  // 4. Changer le statut
-  const handleToggleStatus = (id, currentStatus) => {
-    let newStatus = "payee";
-    if (currentStatus === "payee") {
-      newStatus = "non_payee";
+  // Toggle status
+  const handleToggleStatus = (invoiceId, currentStatus) => {
+    let newStatus = "Paid";
+    if (currentStatus === "Paid") {
+      newStatus = "Unpaid";
     }
 
-    api.patch(`/invoices/${id}/status`, { status: newStatus }).then(() => {
-      getData(); 
+    api.patch(`/invoices/${invoiceId}/status`, { status: newStatus }).then(() => {
+      // Reload invoices
+      api.get("/invoices").then((res) => {
+        setInvoices(res.data);
+      });
     });
   };
 
-  // 5. Télécharger le PDF
-  const handleDownloadPdf = (id, number) => {
-    api.get(`/invoices/${id}/pdf`, { responseType: "blob" }).then((res) => {
+  // Download PDF
+  const handleDownloadPdf = (invoiceId) => {
+    api.get(`/invoices/${invoiceId}/pdf`, { responseType: "blob" }).then((res) => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.download = `facture-${number}.pdf`;
+      link.download = `facture-${invoiceId}.pdf`;
       link.click();
     });
   };
 
+  // Calculate stats
+  let paidCount = 0;
+  let unpaidCount = 0;
+  let totalRevenue = 0;
+
+  for (let i = 0; i < invoices.length; i++) {
+    if (invoices[i].status === "Paid") {
+      paidCount++;
+      totalRevenue = totalRevenue + invoices[i].total_amount;
+    } else {
+      unpaidCount++;
+    }
+  }
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      
-      {/* Sidebar (Barre latérale) */}
-      <aside style={{ width: '260px', borderRight: '1px solid var(--border-light)', backgroundColor: 'var(--bg-surface)', padding: '24px 0', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)', padding: '0 24px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span></span>
-          <span>BILLFORGE</span>
-        </div>
-        
-        <nav style={{ display: 'flex', flexDirection: 'column' }}>
-          <Link to="/dashboard" style={{ padding: '12px 24px', color: 'var(--primary)', backgroundColor: 'var(--bg-app)', borderRight: '3px solid var(--primary)', textDecoration: 'none', fontWeight: '500', display: 'flex', gap: '12px' }}>
-            <span></span> Tableau de bord
-          </Link>
-          <Link to="/invoices/create" style={{ padding: '12px 24px', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: '500', display: 'flex', gap: '12px' }}>
-            <span>➕</span> Nouvelle facture
-          </Link>
-        </nav>
-      </aside>
+    <div className="page-layout">
+      <header className="page-header">
+        <h2 className="page-title">Tableau de bord</h2>
+        <Link to="/invoices/create" className="btn btn-primary">
+          + Nouvelle facture
+        </Link>
+      </header>
 
-      {/* Main content (Contenu principal) */}
-      <main style={{ flex: 1, padding: '32px 40px', overflowY: 'auto' }}>
+      {/* Stats cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+        <div className="card">
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Chiffre d'affaires</div>
+          <div style={{ fontSize: '24px', fontWeight: '600' }}>{totalRevenue.toFixed(2)} MAD</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Total factures</div>
+          <div style={{ fontSize: '24px', fontWeight: '600' }}>{invoices.length}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Payées</div>
+          <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--success-text)' }}>{paidCount}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Non payées</div>
+          <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--warning-text)' }}>{unpaidCount}</div>
+        </div>
+      </div>
+
+      {/* Invoice table */}
+      <div className="card">
+        <h3 className="section-title">Mes factures</h3>
         
-        <header className="page-header">
+        {loading ? (
+          <div>Chargement...</div>
+        ) : invoices.length === 0 ? (
           <div>
-            <h2 className="page-title">Tableau de bord</h2>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>Gérez vos factures efficacement.</p>
+            <p>Aucune facture pour l'instant.</p>
+            <Link to="/invoices/create" className="btn btn-primary">
+              Créer votre première facture
+            </Link>
           </div>
-          <Link to="/invoices/create" className="btn btn-primary">
-            + Nouvelle facture
-          </Link>
-        </header>
-
-        {/* Stats Grid (Grille des statistiques) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-          
-          <div className="card" style={{ borderTop: '3px solid var(--success-text)' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500', marginBottom: '8px' }}>Chiffre d'affaires (payé)</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCurrency(stats.total_revenue)}</div>
-          </div>
-          
-          <div className="card">
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500', marginBottom: '8px' }}>Total factures</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{stats.total_count}</div>
-          </div>
-          
-          <div className="card">
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500', marginBottom: '8px' }}>Factures payées</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--success-text)' }}>{stats.paid_count}</div>
-          </div>
-          
-          <div className="card">
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500', marginBottom: '8px' }}>Factures impayées</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--warning-text)' }}>{stats.unpaid_count}</div>
-          </div>
-
-        </div>
-
-        {/* Invoice table (Tableau des factures) */}
-        <div className="card" style={{ padding: '24px 0' }}>
-          
-          <div style={{ padding: '0 24px', marginBottom: '16px' }}>
-            <h3 className="section-title" style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>Mes factures récentes</h3>
-          </div>
-
-          <div className="table-wrapper">
-            <table className="invoice-table">
-              <thead>
-                <tr>
-                  <th>N° Facture</th>
-                  <th>Client</th>
-                  <th>Date</th>
-                  <th>Total TTC</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+        ) : (
+          <table className="invoice-table">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((invoice) => (
+                <tr key={invoice.id}>
+                  <td>{invoice.id}</td>
+                  <td>{invoice.client_name}</td>
+                  <td>{invoice.issue_date}</td>
+                  <td>{invoice.total_amount} MAD</td>
+                  <td>
+                    <span className={`badge ${invoice.status === 'Paid' ? 'badge-paid' : 'badge-unpaid'}`}>
+                      {invoice.status === 'Paid' ? 'Payée' : 'Non payée'}
+                    </span>
+                  </td>
+                  <td>
+                    <Link to={`/invoices/${invoice.id}`} className="btn btn-ghost btn-xs">
+                      Voir
+                    </Link>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => handleToggleStatus(invoice.id, invoice.status)}
+                    >
+                      {invoice.status === 'Paid' ? 'Impayé' : 'Payé'}
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => handleDownloadPdf(invoice.id)}
+                    >
+                      PDF
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td style={{ fontWeight: '500' }}>{invoice.invoice_number}</td>
-                    <td>{invoice.client_name}</td>
-                    <td style={{ color: 'var(--text-muted)' }}>{new Date(invoice.created_at).toLocaleDateString("fr-MA")}</td>
-                    <td style={{ fontWeight: '500' }}>{formatCurrency(invoice.total_ttc)}</td>
-                    <td>
-                      {/* Utilisation des classes exportées depuis utilities.js */}
-                      <span className={`badge ${STATUS_CLASS[invoice.status]}`}>
-                        {STATUS_LABELS[invoice.status]}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          className="btn btn-ghost btn-xs"
-                          onClick={() => handleToggleStatus(invoice.id, invoice.status)}
-                        >
-                          Changer statut
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-xs"
-                          onClick={() => handleDownloadPdf(invoice.id, invoice.invoice_number)}
-                        >
-                          PDF
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </main>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
